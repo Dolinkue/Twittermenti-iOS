@@ -18,7 +18,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         
-        let hola = ""
+        
     }
 
     @IBAction func predictPressed(_ sender: Any) {
