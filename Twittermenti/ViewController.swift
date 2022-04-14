@@ -23,7 +23,7 @@ class ViewController: UIViewController {
 
     let swifter = Swifter(consumerKey: "rZfsfylmrVZB1CzYgYLEmRq5g", consumerSecret: "RWpgL2zpFiQWDXYDhH4buwC1Y0OGgxLLE6pmdBB5876NFT3TZz")
     
-    
+    let tweetCount = 100
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,16 +38,25 @@ class ViewController: UIViewController {
         
         // cuando el usuario preciona el boton ejecuta el codigo
         
+       fetchTweets()
+    
+    
+        
+        
+    }
+    
+    func fetchTweets () {
+        
         if let searchText = textField.text {
             
             //para buscar los twit desde swifter
-            swifter.searchTweet(using: searchText, lang: "en", count: 100, tweetMode: .extended) { (results,metadata) in
+            swifter.searchTweet(using: searchText, lang: "en", count: tweetCount, tweetMode: .extended) { (results,metadata) in
                 
                 
                 var tweets = [MyTwitClassifier_1Input]()
                 
                 // un for para cargar todos los tweest en un []
-                for i in 0..<100 {
+                for i in 0..<self.tweetCount {
                     
                     if let tweet = results[i]["full_text"].string {
                         
@@ -59,48 +68,7 @@ class ViewController: UIViewController {
                     
                 }
                 
-                do {
-                    
-                  let predictions =  try self.sentimentClassifier.predictions(inputs: tweets)
-                    
-                    
-                   var sentimentalScore = 0
-                    
-                    
-                    for pred in predictions {
-                        
-                        let setiment = pred.label
-                        
-                        if setiment == "pos"{
-                        
-                            sentimentalScore += 1
-                        
-                        }else if setiment == "neg"{
-                        
-                            sentimentalScore -= 1
-                        
-                        }
-                        
-                }
-                                
-                    if sentimentalScore > 20 {
-                        self.sentimentLabel.text = "😁"
-                    }else if sentimentalScore > 10 {
-                        self.sentimentLabel.text = "🙂"
-                    } else if sentimentalScore > 0 {
-                        self.sentimentLabel.text = "🙃"
-                    } else if sentimentalScore == 0 {
-                        self.sentimentLabel.text = "🥸"
-                    }else if sentimentalScore > -10 {
-                        self.sentimentLabel.text = "😕"
-                    }else {
-                        self.sentimentLabel.text = "😩"
-                    }
-                    
-                
-                }catch {
-                    print("error\(error)")
-                }
+                self.makePrediction(with: tweets)
                 
                 
                 
@@ -110,10 +78,58 @@ class ViewController: UIViewController {
                 print("error api\(error)")
             }
         }
+    }
     
+    func makePrediction (with tweets: [MyTwitClassifier_1Input]) {
+        
+        do {
+            
+          let predictions =  try self.sentimentClassifier.predictions(inputs: tweets)
+            
+            
+           var sentimentalScore = 0
+            
+            
+            for pred in predictions {
+                
+                let setiment = pred.label
+                
+                if setiment == "pos"{
+                
+                    sentimentalScore += 1
+                
+                }else if setiment == "neg"{
+                
+                    sentimentalScore -= 1
+                
+                }
+                
+        }
+                        
+            updateUI(with: sentimentalScore)
+            
+        
+        }catch {
+            print("error\(error)")
+        }
     
+    }
+    
+    func updateUI (with sentimentalScore: Int ) {
         
-        
+        if sentimentalScore > 20 {
+            self.sentimentLabel.text = "😁"
+        }else if sentimentalScore > 10 {
+            self.sentimentLabel.text = "🙂"
+        } else if sentimentalScore > 0 {
+            self.sentimentLabel.text = "🙃"
+        } else if sentimentalScore == 0 {
+            self.sentimentLabel.text = "🥸"
+        }else if sentimentalScore > -10 {
+            self.sentimentLabel.text = "😕"
+        }else {
+            self.sentimentLabel.text = "😩"
+        }
     }
     
 }
